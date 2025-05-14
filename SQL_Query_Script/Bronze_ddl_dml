@@ -1,0 +1,295 @@
+/*
+===============================================================================
+DDL Script: Create Bronze Tables
+===============================================================================
+Script Purpose:
+    This script creates tables in the 'bronze' schema, dropping existing tables 
+    if they already exist.
+	  Run this script to re-define the DDL structure of 'bronze' Tables
+===============================================================================
+*/
+
+IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_cust_info;
+GO
+
+CREATE TABLE bronze.crm_cust_info (
+    cst_id              INT,
+    cst_key             NVARCHAR(50),
+    cst_firstname       NVARCHAR(50),
+    cst_lastname        NVARCHAR(50),
+    cst_marital_status  NVARCHAR(50),
+    cst_gndr            NVARCHAR(50),
+    cst_create_date     DATE
+);
+GO
+
+IF OBJECT_ID('bronze.crm_prd_info', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_prd_info;
+GO
+
+CREATE TABLE bronze.crm_prd_info (
+    prd_id       INT,
+    prd_key      NVARCHAR(50),
+    prd_nm       NVARCHAR(50),
+    prd_cost     INT,
+    prd_line     NVARCHAR(50),
+    prd_start_dt DATETIME,
+    prd_end_dt   DATETIME
+);
+GO
+
+IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_sales_details;
+GO
+
+CREATE TABLE bronze.crm_sales_details (
+    sls_ord_num  NVARCHAR(50),
+    sls_prd_key  NVARCHAR(50),
+    sls_cust_id  INT,
+    sls_order_dt INT,
+    sls_ship_dt  INT,
+    sls_due_dt   INT,
+    sls_sales    INT,
+    sls_quantity INT,
+    sls_price    INT
+);
+GO
+
+IF OBJECT_ID('bronze.erp_loc_a101', 'U') IS NOT NULL
+    DROP TABLE bronze.erp_loc_a101;
+GO
+
+CREATE TABLE bronze.erp_loc_a101 (
+    cid    NVARCHAR(50),
+    cntry  NVARCHAR(50)
+);
+GO
+
+IF OBJECT_ID('bronze.erp_cust_az12', 'U') IS NOT NULL
+    DROP TABLE bronze.erp_cust_az12;
+GO
+
+CREATE TABLE bronze.erp_cust_az12 (
+    cid    NVARCHAR(50),
+    bdate  DATE,
+    gen    NVARCHAR(50)
+);
+GO
+
+IF OBJECT_ID('bronze.erp_px_cat_g1v2', 'U') IS NOT NULL
+    DROP TABLE bronze.erp_px_cat_g1v2;
+GO
+
+CREATE TABLE bronze.erp_px_cat_g1v2 (
+    id           NVARCHAR(50),
+    cat          NVARCHAR(50),
+    subcat       NVARCHAR(50),
+    maintenance  NVARCHAR(50)
+);
+GO
+
+
+==========================================The  all details are given here ======================================
+
+
+IF OBJECT_ID ('BRONZE_CRM_CUST_INFO' ,'U') IS NOT NULL
+	 DROP TABLE BRONZE_CRM_CUST_INFO;
+CREATE TABLE BRONZE_CRM_CUST_INFO(
+
+CST_ID INT,
+CST_KEY NVARCHAR(50),
+CST_FIRSTNAME NVARCHAR(50),
+CST_LASTNAME NVARCHAR(50),
+CST_MATETIAL_STATUS NVARCHAR(50),
+CST_GNDR NVARCHAR (50),
+CST_CREATE_DATE DATE
+)
+
+IF OBJECT_ID ('BRONZE_CRM_PRD_INFO' ,'U') IS NOT NULL
+	 DROP TABLE BRONZE_CRM_PRD_INFO;
+CREATE TABLE BRONZE_CRM_PRD_INFO
+(
+PRD_ID INT,
+PRD_KEY NVARCHAR(50),
+PRD_NM NVARCHAR(50),
+PRD_COST INT,
+PRD_LINE NVARCHAR (50),
+PRD_START_DT DATETIME,
+PRD_END_DT DATETIME
+);
+
+IF OBJECT_ID ('BRONZE_CRM_SALES_DETAILS' ,'U') IS NOT NULL
+	 DROP TABLE  BRONZE_CRM_SALES_DETAILS;
+CREATE TABLE BRONZE_CRM_SALES_DETAILS
+(
+SLS_ORD_NUM NVARCHAR(50),
+SLS_PRD_KEY NVARCHAR(50),
+SLS_CUST_ID INT,
+SLS_ORDER_DT INT,
+SLS_SHIP_DT INT,
+SLS_DUE_DT INT,
+SLS_SALES INT,
+SLS_QUANTITY INT,
+SLS_PRICE INT
+);
+
+
+IF OBJECT_ID (' BRONZE_ERP_LOC_A101' ,'U') IS NOT NULL
+	 DROP TABLE BRONZE_ERP_LOC_A101;
+CREATE TABLE BRONZE_ERP_LOC_A101
+(
+CID NVARCHAR (59),
+CNTRY NVARCHAR(50), 
+);
+
+
+IF OBJECT_ID ('BRONZE_ERP_PX_CAT_GLV2' ,'U') IS NOT NULL
+	 DROP TABLE BRONZE_ERP_PX_CAT_GLV2;
+CREATE TABLE BRONZE_ERP_PX_CAT_GLV2
+(
+CID NVARCHAR (5),
+BDATE DATE,
+GEN NVARCHAR (50)
+);
+
+
+IF OBJECT_ID ('BRONZE_ERP_CUST_AZ12' ,'U') IS NOT NULL
+	 DROP TABLE BRONZE_ERP_CUST_AZ12;
+CREATE TABLE BRONZE_ERP_CUST_AZ12
+(
+CID NVARCHAR(50),
+BDATE DATE,
+GEN NVARCHAR(50)
+);
+
+IF OBJECT_ID (' BRONZE_ERP_PX_CAT_G1V2' ,'U') IS NOT NULL
+	 DROP TABLE BRONZE_ERP_PX_CAT_G1V2;
+CREATE TABLE BRONZE_ERP_PX_CAT_G1V2
+(
+ID NVARCHAR (50),
+CAT NVARCHAR(50),
+SUBCATE NVARCHAR(50),
+MAINTENANCE NVARCHAR (50)
+);
+
+
+----SQL TASK 
+--WRITE SQL BULK INSERT TO LOAD ALL CSV FILES INTO YOUR BRONZE TABLES
+
+EXEC BRONZE.LOAD_BRONZE;
+GO
+
+CREATE OR ALTER PROCEDURE BRONZE.LOAD_BRONZE AS 
+BEGIN
+	DECLARE  @START_TIME DATETIME, @END_TIME DATETIME, @BATCH_START_TIME DATETIME, @BATCH_END_TIME DATETIME;
+	BEGIN TRY
+	SET @BATCH_START_TIME =GETDATE();
+	PRINT '==========================================================='
+	PRINT 'LODING BRONZE LAYER'
+	PRINT '==========================================================='
+
+	PRINT '-----------------------------------------------------------'
+	PRINT 'LODING CRM TABLES'
+	PRINT '-----------------------------------------------------------'
+	SET @START_TIME =GETDATE();
+	PRINT '>>TRUNCATING TABLE : BRONZE.CRM_CUST_INFO'
+TRUNCATE TABLE BRONZE_CRM_CUST_INFO;
+
+PRINT '>>INSERTING DATA INTO : BRONZE.CRM_CUST_INFO'
+BULK  INSERT BRONZE.CRM_CUST_INFO
+FROM 'C:\Users\intel\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
+WITH(
+FIRSTROW  = 2,
+FIELDTERMINATOR =',',
+TABLOCK 
+);
+ 
+SET @END_TIME =GETDATE()
+PRINT '>>LOAD DURATION :' + CAST(DATEDIFF(SECOND, @START_TIME ,@END_TIME)AS NVARCHAR) + 'SECONDS'
+PRINT '>> --------------------';
+
+
+SET @END_TIME =GETDATE();
+PRINT '>> TRUNCATING TABLE : BRONZE CRM_PRD_INFO';
+TRUNCATE TABLE BRONZE_CRM_DRD_INFO;
+BULK INSERT BRONZE_CRM_PRD_INFO
+FROM 'C:\Users\intel\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\datasets\source_crm\prd_info.csv'
+WITH(
+FIRSTROW = 2,
+FIELDTERMINATOR = ',',
+TABLOCK
+)
+
+TRUNCATE TABLE BRONZE_CRM_SALES_DETAILS;
+BULK  INSERT BRONZE_CRM_SALES_DETAILS
+FROM  'C:\Users\intel\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\datasets\source_crm\sales_details.csv'
+WITH(
+FIRSTROW  = 2,
+FIELDTERMINATOR =',',
+TABLOCK 
+);
+
+	PRINT '-----------------------------------------------------------'
+	PRINT 'LODING ERP TABLES'
+	PRINT '-----------------------------------------------------------'
+
+
+TRUNCATE TABLE  BRONZE_ERP_LOC_A101;
+BULK  INSERT  BRONZE_ERP_LOC_A101
+FROM 'C:\Users\intel\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\datasets\source_erp\LOC_A101.csv'
+WITH(
+FIRSTROW  = 2,
+FIELDTERMINATOR =',',
+TABLOCK 
+);
+
+--TRUNCATE TABLE  BRONZE_ERP_PX_CAT_GLV2;
+--BULK  INSERT  BRONZE_ERP_PX_CAT_GLV2
+--FROM 'C:\Users\intel\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
+--WITH(
+--FIRSTROW  = 2,
+--FIELDTERMINATOR =',',
+--TABLOCK 
+--);
+
+TRUNCATE TABLE   BRONZE_ERP_CUST_AZ12;
+BULK  INSERT   BRONZE_ERP_CUST_AZ12
+FROM 'C:\Users\intel\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\datasets\source_erp\CUST_AZ12.csv'
+WITH(
+FIRSTROW  = 2,
+FIELDTERMINATOR =',',
+TABLOCK 
+);
+
+
+TRUNCATE TABLE BRONZE_ERP_PX_CAT_G1V2;
+BULK  INSERT BRONZE_ERP_PX_CAT_G1V2
+FROM 'C:\Users\intel\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\datasets\source_erp\PX_CAT_G1V2.csv'
+WITH(
+FIRSTROW  = 2,
+FIELDTERMINATOR =',',
+TABLOCK 
+);
+SET @END_TIME =GETDATE();
+	PRINT '>> LOAD DURATION :' + CAST(DATEDIFF(SECOND, @START_TIME, @END_TIME) AS NVARCHAR) +'SECOND';
+	PRINT '>> ------------------------';
+
+	SET @BATCH_END_TIME =GETDATE();
+		PRINT '============================================================='
+		PRINT 'LOADING BRONZE LAYER IS COMPLETED';
+		PRINT '- TOTAL LOAD DURATION :' + CAST(DATEDIFF(SECOND, @BATCH_START_TIME, @BATCH_END_TIME) AS NVARCHAR) + 'SECOND';
+		PRINT '============================================================='
+	END TRY
+	BEGIN CATCH
+		PRINT '======================================================'
+		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER'
+		PRINT 'ERROR MESSAGE' + ERROR_MESSAGE ();
+		PRINT 'ERROR MESSAGE' + CAST (ERROR_NUMBER() AS NVARCHAR);
+		PRINT 'ERROR MESSAGE' + CAST (ERROR_STATE() AS NVARCHAR);
+		PRINT '=================================================='
+	END CATCH
+END
+GO
+EXEC BRONZE.LOAD_BRONZE;
+GO
