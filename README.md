@@ -1,1 +1,1 @@
-# SQL_Data_Werehouse_Project
+# SQL_Data_Warehouse_Project
